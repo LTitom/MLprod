@@ -1,12 +1,12 @@
-name: Run Tests
+name: Run Node.js Tests
 
 on:
   push:
     branches:
-      - master
+      - master  
   pull_request:
     branches:
-      - master
+      - master  
 
 jobs:
   test:
@@ -15,26 +15,27 @@ jobs:
     services:
       mongodb:
         image: mongo:latest
-        options: --health-cmd='curl --silent --fail localhost:27017 || exit 1' --health-interval=10s --health-timeout=5s --health-retries=5
-        env:
-          MONGO_INITDB_ROOT_USERNAME: admin
-          MONGO_INITDB_ROOT_PASSWORD: adminpassword
+        options: --health-cmd="curl --silent --fail localhost:27017" --health-timeout=30s --health-retries=3
         ports:
-          - 27017:27017
+          - 27017:27017  # Expose the MongoDB port
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # Step 4: Run the tests with MongoDB URI
       - name: Run tests
+        run: npm test -- --uri=mongodb://admin:adminpassword@localhost:27017
         env:
-          MONGO_URI: mongodb://admin:adminpassword@mongodb:27017
-        run: npm test
+          MONGODB_URI: mongodb://admin:adminpassword@localhost:27017
